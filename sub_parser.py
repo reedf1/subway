@@ -12,7 +12,7 @@ class SubParser:
         self.headers = {
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
 
-    def _scrape_sub(self, subreddit: str):
+    def _scrape_sub(self, subreddit: str, limit=None):
         with requests.get(f"https://old.reddit.com/r/{subreddit}/", headers=self.headers) as response:
             page = response.content
 
@@ -26,6 +26,9 @@ class SubParser:
             if link:
                 if f"old.reddit.com/r/{subreddit}/comments/" in link:
                     meta_front_page.append(link)
+
+        if limit:
+            meta_front_page = meta_front_page[:limit]
 
         front_page = {}
         for link in (tq := tqdm(meta_front_page)):
@@ -65,10 +68,13 @@ class SubParser:
 
 if __name__ == "__main__":
     example_payload = {
-        'post': {'post': {'title': 'title', 'content': 'content'}, 'comments': [{'content': 'content'}]}}
-
-    example_payload[]
-
-    print(tabulate(example_payload))
-
-
+        'post': {'post': {'title': 'title', 'content': 'content'},
+                 'comments': [{'content': 'content1'}, {'content': 'content2'}]}}
+    sub_parser = SubParser()
+    front_page = sub_parser._scrape_sub('ukpolitics', limit=1)
+    titles = [title for title, post in front_page.items()]
+    _,comments = list(front_page.items())[0]
+    comments = [comment['content'] for comment in comments['comments']]
+    print(titles)
+    print(tabulate({"/r/ukpolitics":titles}, headers="keys"))
+    print(tabulate({"Comments":comments[0:10]}, headers="keys",tablefmt="mixed_grid"))
